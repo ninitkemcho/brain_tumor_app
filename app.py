@@ -4,8 +4,8 @@ from PIL import Image
 from utils import preprocess_image, download_model_from_url, load_model
 from model import get_model
 
-MODEL_PATH = "model.pth"
-MODEL_URL = "https://drive.google.com/uc?id=11mPVdyes6gu_Oy_r9fTSVHWeGAepa4jr&export=download"
+MODEL_PATH = "resnet18_brain_tumor.safetensors"
+MODEL_URL = "https://drive.google.com/uc?id=1sHycWRvKoLGinNkB_jT4yVOolWGD1EqP&export=download"
 
 @st.cache_resource
 def initialize_model():
