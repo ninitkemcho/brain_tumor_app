@@ -35,9 +35,17 @@ def download_model_from_url(url, filename):
 
 def load_model(model, model_path):
     try:
-        # Explicitly set weights_only=False for compatibility with older PyTorch model files
+        # Try with weights_only=True first (safer), fallback to weights_only=False if needed
         print("Loading model...")
-        model.load_state_dict(torch.load(model_path, map_location='cpu', weights_only=False))
+        try:
+            model.load_state_dict(torch.load(model_path, map_location='cpu', weights_only=True))
+            print("Model loaded with weights_only=True (secure mode)")
+        except Exception as weights_only_error:
+            print(f"weights_only=True failed: {weights_only_error}")
+            print("Falling back to weights_only=False...")
+            model.load_state_dict(torch.load(model_path, map_location='cpu', weights_only=False))
+            print("Model loaded with weights_only=False")
+        
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         model.eval()
