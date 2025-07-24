@@ -32,9 +32,12 @@ def load_model():
         st.warning("Model not found locally. Downloading from Google Drive...")
         download_model_from_drive(drive_file_id, model_path)
 
-    model = BrainTumorResNet(num_classes=4)
-    model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
+
+    model = models.resnet18()
+    model.fc = nn.Linear(model.fc.in_features, 4)
+    model.load_state_dict(torch.load("resnet18_brain_tumor.pth", weights_only=True))
     model.eval()
+
     return model
 
 model = load_model()
