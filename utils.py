@@ -24,6 +24,7 @@ def download_model_from_url(url, filename):
 def load_model(model_path):
     from model import BrainTumorResNet
     model = BrainTumorResNet(num_classes=4)
-    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'), weights_only=False))
+
     model.eval()
     return model
