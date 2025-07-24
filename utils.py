@@ -9,7 +9,9 @@ def preprocess_image(image):
         transforms.Grayscale(num_output_channels=1),
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
+        transforms.Normalize([0.5], [0.5])
     ])
+
     if isinstance(image, Image.Image):
         return transform(image).unsqueeze(0)
     return transform(Image.open(image)).unsqueeze(0)
