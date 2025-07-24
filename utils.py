@@ -3,7 +3,7 @@ import gdown
 from torchvision import transforms
 from PIL import Image
 import os
-
+import pickle 
 def preprocess_image(image):
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
@@ -43,30 +43,9 @@ def load_model(model, model_path):
         print(f"Loading model from {model_path}...")
         
         # Determine file format and load accordingly
-        if model_path.endswith('.safetensors'):
-            try:
-                from safetensors.torch import load_file
-                state_dict = load_file(model_path)
-                model.load_state_dict(state_dict)
-                print("Model loaded using SafeTensors format")
-            except ImportError:
-                raise ImportError("SafeTensors not installed. Run: pip install safetensors")
-                
-        elif model_path.endswith('.pt'):
-            # TorchScript format
-            model = torch.jit.load(model_path, map_location='cpu')
-            print("Model loaded using TorchScript format")
-            
-        else:
-            # Standard .pth format with fallback
-            try:
-                model.load_state_dict(torch.load(model_path, map_location='cpu', weights_only=True))
-                print("Model loaded with weights_only=True (secure mode)")
-            except Exception as weights_only_error:
-                print(f"weights_only=True failed: {weights_only_error}")
-                print("Falling back to weights_only=False...")
-                model.load_state_dict(torch.load(model_path, map_location='cpu', weights_only=False))
-                print("Model loaded with weights_only=False")
+        with open(model_path, "rb") as f:
+            model = pickle.load(f)
+    
         
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
