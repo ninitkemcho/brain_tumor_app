@@ -1,8 +1,8 @@
+import os
 import torch
+import gdown  # install with pip if you don’t have it
 from torchvision import transforms
 from PIL import Image
-import gdown
-import os
 from model import BrainTumorResNet18
 
 def preprocess_image(image):
@@ -16,6 +16,7 @@ def preprocess_image(image):
 
 def download_model_from_url(url, output_path):
     if not os.path.exists(output_path):
+        print(f"Downloading model from {url}...")
         gdown.download(url, output_path, quiet=False)
 
 def load_model(model_path):
