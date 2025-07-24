@@ -36,12 +36,7 @@ def main():
     st.title("🧠 Brain Tumor Classification")
     st.write("Upload a brain MRI scan image to classify tumor type:")
     
-    # Add some debug information
-    with st.expander("Debug Information"):
-        st.write(f"Model file exists: {os.path.exists(MODEL_PATH)}")
-        if os.path.exists(MODEL_PATH):
-            st.write(f"Model file size: {os.path.getsize(MODEL_PATH)} bytes")
-    
+
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
     
     if uploaded_file is not None:
