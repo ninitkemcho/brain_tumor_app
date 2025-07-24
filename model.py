@@ -1,9 +1,12 @@
 import torch.nn as nn
-import torchvision.models as models
+from torchvision.models import resnet18
 
-def get_model():
-    model = models.resnet18(pretrained=False)
-    model.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)  # for grayscale
-    model.fc = nn.Linear(model.fc.in_features, 4)  # 4 output classes
-    
-    return model
+class BrainTumorResNet18(nn.Module):
+    def __init__(self, num_classes=4):
+        super(BrainTumorResNet18, self).__init__()
+        self.model = resnet18()
+        self.model.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
+
+    def forward(self, x):
+        return self.model(x)
