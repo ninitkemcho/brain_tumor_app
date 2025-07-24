@@ -247,13 +247,13 @@ def main():
                                         min_value=0, max_value=10, value=0)
             
             # Check if all fields are filled and prediction exists
-            form_complete = (sex != "Select..." and age is not None and 
+            form_complete = (sex != "Select..." and age is not None and age > 0 and 
                            symptoms_duration != "Select..." and previous_surgery != "Select..." and 
                            family_history != "Select..." and seizure_history != "Select..." and 
                            prediction_result is not None)
             
             submitted = st.form_submit_button("Calculate Survival Rate & Treatment Plan", 
-                                            use_container_width=True, disabled=not form_complete)
+                                            use_container_width=True)
         
         if submitted and prediction_result and form_complete:
             # Calculate survival rate and treatment
