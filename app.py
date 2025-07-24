@@ -30,7 +30,7 @@ def initialize_model():
         st.info("Please ensure your model was saved properly during training.")
         return None
 
-def get_survival_rate_and_treatment(tumor_type, age, sex, tumor_size, symptoms_duration, karnofsky_score, previous_surgery):
+def get_survival_rate_and_treatment(tumor_type, age, sex, symptoms_duration, previous_surgery, family_history, seizure_history, headache_severity):
     """Calculate survival rate and treatment recommendations based on patient data and tumor type"""
     
     # Base survival rates by tumor type (5-year survival rates)
@@ -53,24 +53,34 @@ def get_survival_rate_and_treatment(tumor_type, age, sex, tumor_size, symptoms_d
     elif age > 65:
         survival_rate -= 20
     
-    # Size adjustments
-    if tumor_size == "Small (<3cm)":
-        survival_rate += 10
-    elif tumor_size == "Large (>5cm)":
-        survival_rate -= 15
+    # Sex adjustments (general medical data shows slight differences)
+    if sex == "Female" and tumor_type == "Meningioma":
+        survival_rate += 5  # Meningiomas more common in females but often have better outcomes
     
-    # Karnofsky score adjustments
-    if karnofsky_score >= 80:
-        survival_rate += 10
-    elif karnofsky_score < 60:
-        survival_rate -= 15
+    # Symptoms duration adjustments
+    if symptoms_duration == "< 1 month":
+        survival_rate += 5  # Early detection
+    elif symptoms_duration == "> 1 year":
+        survival_rate -= 10  # Long duration may indicate aggressive tumor
+    
+    # Family history adjustment
+    if family_history == "Yes":
+        survival_rate -= 5  # Genetic predisposition may indicate more aggressive disease
+    
+    # Seizure history adjustment
+    if seizure_history == "Yes":
+        survival_rate -= 5  # Often indicates tumor proximity to eloquent brain areas
+    
+    # Headache severity adjustment
+    if headache_severity >= 8:
+        survival_rate -= 5  # Severe headaches may indicate increased intracranial pressure
     
     # Ensure survival rate stays within reasonable bounds
     survival_rate = max(5, min(95, survival_rate))
     
     # Treatment recommendations based on tumor type
     if tumor_type == "Glioma":
-        if tumor_size == "Large (>5cm)" or karnofsky_score < 70:
+        if age > 65 or symptoms_duration == "> 1 year":
             treatment_recommendations = [
                 "🏥 Surgical resection (maximal safe resection)",
                 "⚡ Radiation therapy (60 Gy in 30 fractions)",
@@ -88,7 +98,7 @@ def get_survival_rate_and_treatment(tumor_type, age, sex, tumor_size, symptoms_d
             ]
     
     elif tumor_type == "Meningioma":
-        if tumor_size == "Small (<3cm)" and age < 65:
+        if age < 65 and symptoms_duration == "< 1 month":
             treatment_recommendations = [
                 "👁️ Active surveillance with serial MRI",
                 "🏥 Surgical resection if symptomatic",
@@ -224,28 +234,30 @@ def main():
         
         # Patient information form
         with st.form("patient_form"):
-            sex = st.selectbox("Sex", ["Male", "Female"])
-            age = st.number_input("Age", min_value=1, max_value=120, value=45)
-            tumor_size = st.selectbox("Tumor Size", ["Small (<3cm)", "Medium (3-5cm)", "Large (>5cm)"])
+            sex = st.selectbox("Sex", ["Select...", "Male", "Female"], index=0)
+            age = st.number_input("Age", min_value=1, max_value=120, value=None, placeholder="Enter age")
             symptoms_duration = st.selectbox("Symptoms Duration", 
-                                           ["< 1 month", "1-6 months", "6-12 months", "> 1 year"])
-            karnofsky_score = st.slider("Karnofsky Performance Score", 
-                                      min_value=10, max_value=100, value=80, step=10,
-                                      help="Functional status scale (100 = normal, no complaints)")
-            previous_surgery = st.selectbox("Previous Brain Surgery", ["No", "Yes"])
-            family_history = st.selectbox("Family History of Brain Tumors", ["No", "Yes"])
-            seizure_history = st.selectbox("History of Seizures", ["No", "Yes"])
+                                           ["Select...", "< 1 month", "1-6 months", "6-12 months", "> 1 year"], index=0)
+            previous_surgery = st.selectbox("Previous Brain Surgery", ["Select...", "No", "Yes"], index=0)
+            family_history = st.selectbox("Family History of Brain Tumors", ["Select...", "No", "Yes"], index=0)
+            seizure_history = st.selectbox("History of Seizures", ["Select...", "No", "Yes"], index=0)
             headache_severity = st.slider("Headache Severity (0-10)", 
-                                        min_value=0, max_value=10, value=3)
+                                        min_value=0, max_value=10, value=0)
+            
+            # Check if all fields are filled and prediction exists
+            form_complete = (sex != "Select..." and age is not None and 
+                           symptoms_duration != "Select..." and previous_surgery != "Select..." and 
+                           family_history != "Select..." and seizure_history != "Select..." and 
+                           prediction_result is not None)
             
             submitted = st.form_submit_button("Calculate Survival Rate & Treatment Plan", 
-                                            use_container_width=True)
+                                            use_container_width=True, disabled=not form_complete)
         
-        if submitted and prediction_result:
+        if submitted and prediction_result and form_complete:
             # Calculate survival rate and treatment
             survival_rate, treatments = get_survival_rate_and_treatment(
-                prediction_result, age, sex, tumor_size, symptoms_duration, 
-                karnofsky_score, previous_surgery
+                prediction_result, age, sex, symptoms_duration, 
+                previous_surgery, family_history, seizure_history, headache_severity
             )
             
             # Display survival rate
@@ -281,23 +293,27 @@ def main():
                 st.write("**Favorable factors:**")
                 if age < 40:
                     st.write("• Young age")
-                if karnofsky_score >= 80:
-                    st.write("• Good functional status")
-                if tumor_size == "Small (<3cm)":
-                    st.write("• Small tumor size")
+                if symptoms_duration == "< 1 month":
+                    st.write("• Early symptom onset")
+                if sex == "Female" and prediction_result == "Meningioma":
+                    st.write("• Female gender (for Meningioma)")
                 
                 st.write("**Risk factors:**")
                 if age > 65:
                     st.write("• Advanced age")
-                if karnofsky_score < 70:
-                    st.write("• Reduced functional status")
-                if tumor_size == "Large (>5cm)":
-                    st.write("• Large tumor size")
+                if symptoms_duration == "> 1 year":
+                    st.write("• Long duration of symptoms")
                 if family_history == "Yes":
                     st.write("• Family history of brain tumors")
+                if seizure_history == "Yes":
+                    st.write("• History of seizures")
+                if headache_severity >= 8:
+                    st.write("• Severe headaches")
         
         elif submitted and not prediction_result:
             st.warning("Please upload and analyze an image first to get treatment recommendations.")
+        elif submitted and not form_complete:
+            st.warning("Please fill out all patient information fields.")
 
 if __name__ == "__main__":
     main()
