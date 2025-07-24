@@ -1,34 +1,29 @@
 import streamlit as st
-import torch
-from PIL import Image
 from utils import preprocess_image, download_model_from_url, load_model
-from model import get_model
+import os
 
-MODEL_PATH = "resnet18_brain_tumor.pth"
-MODEL_URL = "https://drive.google.com/file/d/1WgduhxetvbQKR4sWTVA7cyftpvoN8ga-/view?usp=drive_link"
+# Put your direct download link here (Google Drive example):
+MODEL_URL = 'https://drive.google.com/uc?id=YOUR_FILE_ID&export=download'
+MODEL_PATH = 'resnet18_brain_tumor.pth'
 
 @st.cache_resource
 def initialize_model():
     download_model_from_url(MODEL_URL, MODEL_PATH)
-    model = get_model()
-    model = load_model(model, MODEL_PATH)
-    return model
+    return load_model(MODEL_PATH)
+
+model = initialize_model()
 
 st.title("Brain Tumor Classification")
-st.write("Upload a brain MRI scan image:")
+uploaded_file = st.file_uploader("Upload brain MRI image", type=["jpg", "jpeg", "png"])
 
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
+classes = ['Glioma', 'Meningioma', 'No Tumor', 'Pituitary']
 
 if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
-
-    model = initialize_model()
-    input_tensor = preprocess_image(image)
-
+    image_tensor = preprocess_image(uploaded_file)
     with torch.no_grad():
-        output = model(input_tensor)
-        prediction = torch.argmax(output, dim=1).item()
+        outputs = model(image_tensor)
+        _, predicted = outputs.max(1)
+        pred_class = classes[predicted.item()]
 
-    class_names = ["Glioma", "Meningioma", "No Tumor", "Pituitary"]
-    st.write(f"### Prediction: {class_names[prediction]}")
+    st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+    st.success(f"Prediction: **{pred_class}**")
