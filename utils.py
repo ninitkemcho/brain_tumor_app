@@ -37,8 +37,10 @@ def load_model(model, model_path):
     try:
         # First try with weights_only=False since the model was trained with older PyTorch
         print("Loading model with weights_only=False...")
-        state_dict = torch.load(model_path, map_location=torch.device('cpu'), weights_only=False)
-        model.load_state_dict(state_dict)
+        #state_dict = torch.load(model_path, map_location=torch.device('cpu'), weights_only=False)
+        model.load_state_dict(torch.load(model_path, map_location='cpu'))
+
+        #model.load_state_dict(state_dict)
         model.eval()
         print("Model loaded successfully!")
         return model
