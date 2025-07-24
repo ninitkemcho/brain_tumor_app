@@ -35,19 +35,13 @@ def download_model_from_url(url, filename):
 
 def load_model(model, model_path):
     try:
-        # Load with weights_only=True for security and compatibility
-        state_dict = torch.load(model_path, map_location=torch.device('cpu'), weights_only = False)
+        # First try with weights_only=False since the model was trained with older PyTorch
+        print("Loading model with weights_only=False...")
+        state_dict = torch.load(model_path, map_location=torch.device('cpu'), weights_only=False)
         model.load_state_dict(state_dict)
         model.eval()
+        print("Model loaded successfully!")
         return model
     except Exception as e:
         print(f"Error loading model: {e}")
-        # Try loading without weights_only if the above fails
-        try:
-            state_dict = torch.load(model_path, map_location=torch.device('cpu'))
-            model.load_state_dict(state_dict)
-            model.eval()
-            return model
-        except Exception as e2:
-            print(f"Secondary loading attempt failed: {e2}")
-            raise e2
+        raise e
