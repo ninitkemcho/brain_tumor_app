@@ -4,6 +4,9 @@ from torchvision import transforms
 from PIL import Image
 import os
 import pickle 
+# Import the model class so it's available during unpickling
+from model import BrainTumorResNet
+
 def preprocess_image(image):
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
@@ -46,7 +49,6 @@ def load_model(model, model_path):
         with open(model_path, "rb") as f:
             model = pickle.load(f)
     
-        
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         model.eval()
