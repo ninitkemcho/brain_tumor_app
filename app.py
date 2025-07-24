@@ -5,7 +5,7 @@ from utils import preprocess_image, download_model_from_url, load_model
 from model import get_model
 
 MODEL_PATH = "resnet18_brain_tumor.pth"
-MODEL_URL = "https://drive.google.com/uc?id=YOUR_FILE_ID&export=download"
+MODEL_URL = "https://drive.google.com/file/d/1WgduhxetvbQKR4sWTVA7cyftpvoN8ga-/view?usp=drive_link"
 
 @st.cache_resource
 def initialize_model():
