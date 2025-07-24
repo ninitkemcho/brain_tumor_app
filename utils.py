@@ -1,29 +1,25 @@
 import torch
-import requests
 from torchvision import transforms
 from PIL import Image
+import gdown
 import os
+from model import BrainTumorResNet18
 
 def preprocess_image(image):
     transform = transforms.Compose([
         transforms.Grayscale(num_output_channels=1),
         transforms.Resize((224, 224)),
-        transforms.ToTensor(),
+        transforms.ToTensor()
     ])
-    if isinstance(image, Image.Image):
-        return transform(image).unsqueeze(0)
-    return transform(Image.open(image)).unsqueeze(0)
+    image = Image.open(image).convert("RGB")
+    return transform(image).unsqueeze(0)
 
-def download_model_from_url(url, filename):
-    if os.path.exists(filename):
-        return
-    print("Downloading model...")
-    response = requests.get(url)
-    with open(filename, "wb") as f:
-        f.write(response.content)
-    print("Download complete.")
+def download_model_from_url(url, output_path):
+    if not os.path.exists(output_path):
+        gdown.download(url, output_path, quiet=False)
 
-def load_model(model, model_path):
+def load_model(model_path):
+    model = BrainTumorResNet18(num_classes=4)
     model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     model.eval()
     return model
