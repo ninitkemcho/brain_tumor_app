@@ -35,10 +35,9 @@ def download_model_from_url(url, filename):
 
 def load_model(model, model_path):
     try:
-        # First try with weights_only=False since the model was trained with older PyTorch
-        print("Loading model with weights_only=False...")
-
-        model.load_state_dict(torch.load(model_path, map_location='cpu'))
+        # Explicitly set weights_only=False for compatibility with older PyTorch model files
+        print("Loading model...")
+        model.load_state_dict(torch.load(model_path, map_location='cpu', weights_only=False))
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = model.to(device)
         model.eval()
