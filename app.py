@@ -58,7 +58,9 @@ def get_survival_rate_and_treatment(tumor_type, age, sex, symptoms_duration, pre
         survival_rate += 5  # Meningiomas more common in females but often have better outcomes
     
     # Symptoms duration adjustments
-    if symptoms_duration == "< 1 month":
+    if symptoms_duration == "No symptoms":
+        survival_rate += 10  # No symptoms indicates better prognosis
+    elif symptoms_duration == "< 1 month":
         survival_rate += 5  # Early detection
     elif symptoms_duration == "> 1 year":
         survival_rate -= 10  # Long duration may indicate aggressive tumor
@@ -189,7 +191,7 @@ def main():
         if uploaded_file is not None:
             try:
                 image = Image.open(uploaded_file)
-                st.image(image, caption="Uploaded Image", use_container_width=True)
+                st.image(image, caption="Uploaded Image", width=300)
                 
                 with st.spinner("Loading model..."):
                     model = initialize_model()
@@ -237,7 +239,7 @@ def main():
             sex = st.selectbox("Sex", ["Select...", "Male", "Female"], index=0)
             age = st.number_input("Age", min_value=1, max_value=120, value=None, placeholder="Enter age")
             symptoms_duration = st.selectbox("Symptoms Duration", 
-                                           ["Select...", "< 1 month", "1-6 months", "6-12 months", "> 1 year"], index=0)
+                                           ["Select...", "No symptoms", "< 1 month", "1-6 months", "6-12 months", "> 1 year"], index=0)
             previous_surgery = st.selectbox("Previous Brain Surgery", ["Select...", "No", "Yes"], index=0)
             family_history = st.selectbox("Family History of Brain Tumors", ["Select...", "No", "Yes"], index=0)
             seizure_history = st.selectbox("History of Seizures", ["Select...", "No", "Yes"], index=0)
@@ -293,7 +295,9 @@ def main():
                 st.write("**Favorable factors:**")
                 if age < 40:
                     st.write("• Young age")
-                if symptoms_duration == "< 1 month":
+                if symptoms_duration == "No symptoms":
+                    st.write("• No symptoms present")
+                elif symptoms_duration == "< 1 month":
                     st.write("• Early symptom onset")
                 if sex == "Female" and prediction_result == "Meningioma":
                     st.write("• Female gender (for Meningioma)")
