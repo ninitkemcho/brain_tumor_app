@@ -1,6 +1,8 @@
 import torch
 from torchvision import transforms
 from PIL import Image
+import os
+import requests
 
 def preprocess_image(image):
     transform = transforms.Compose([
@@ -9,8 +11,15 @@ def preprocess_image(image):
         transforms.ToTensor(),
         transforms.Normalize([0.5], [0.5])
     ])
-    image = transform(image).unsqueeze(0)  # add batch dimension
-    return image
+    return transform(image).unsqueeze(0)
+
+def download_model_from_url(url, filename):
+    if not os.path.exists(filename):
+        print("Downloading model...")
+        r = requests.get(url)
+        with open(filename, 'wb') as f:
+            f.write(r.content)
+        print("Download complete.")
 
 def load_model(model_path):
     from model import BrainTumorResNet
