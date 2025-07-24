@@ -1,8 +1,14 @@
 import streamlit as st
 import torch
 from PIL import Image
+import sys
+import os
+
+# Add current directory to Python path to ensure imports work
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from utils import preprocess_image, download_model_from_url, load_model
-from model import get_model
+from model import get_model, BrainTumorResNet
 
 MODEL_PATH = "model.pkl"
 MODEL_URL = "https://drive.google.com/uc?id=1oXRJHDblcAjD3yBDCW9DvIW9QQ_jqVKt&export=download"
@@ -10,31 +16,44 @@ MODEL_URL = "https://drive.google.com/uc?id=1oXRJHDblcAjD3yBDCW9DvIW9QQ_jqVKt&ex
 @st.cache_resource
 def initialize_model():
     try:
+        # Download model if needed
         download_model_from_url(MODEL_URL, MODEL_PATH)
+        
+        # Create model instance
         model = get_model()
+        
+        # Load the trained weights
         model = load_model(model, MODEL_PATH)
         return model
+        
     except Exception as e:
         st.error(f"Error initializing model: {str(e)}")
+        st.error("This usually happens when the model file format doesn't match the expected format.")
+        st.info("Please ensure your model was saved properly during training.")
         return None
 
 def main():
     st.title("🧠 Brain Tumor Classification")
     st.write("Upload a brain MRI scan image to classify tumor type:")
     
+    # Add some debug information
+    with st.expander("Debug Information"):
+        st.write(f"Model file exists: {os.path.exists(MODEL_PATH)}")
+        if os.path.exists(MODEL_PATH):
+            st.write(f"Model file size: {os.path.getsize(MODEL_PATH)} bytes")
+    
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
     
     if uploaded_file is not None:
         try:
             image = Image.open(uploaded_file)
-            # Fixed deprecated parameter
             st.image(image, caption="Uploaded Image", use_container_width=True)
             
             with st.spinner("Loading model..."):
                 model = initialize_model()
             
             if model is None:
-                st.error("Failed to load model. Please try again.")
+                st.error("Failed to load model. Please check the debug information above.")
                 return
             
             with st.spinner("Processing image..."):
@@ -59,6 +78,7 @@ def main():
                 
         except Exception as e:
             st.error(f"Error processing image: {str(e)}")
+            st.error("Please check if the uploaded file is a valid image.")
 
 if __name__ == "__main__":
     main()
