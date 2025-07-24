@@ -3,7 +3,7 @@ from PIL import Image
 from utils import preprocess_image, download_model_from_url, load_model
 import torch
 
-MODEL_URL = "https://drive.google.com/file/d/1AhlepsKoDDDzxU-ROKmQvOKld-7NXNEK/view?usp=drive_link"  # replace with your direct link
+MODEL_URL = "https://drive.google.com/file/d/1WgduhxetvbQKR4sWTVA7cyftpvoN8ga-/view?usp=drive_link"  # replace with your direct link
 MODEL_PATH = "resnet18_brain_tumor.pth"
 CLASS_NAMES = ['Glioma Tumor', 'Meningioma Tumor', 'No Tumor', 'Pituitary Tumor']
 
