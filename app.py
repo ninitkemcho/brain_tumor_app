@@ -3,7 +3,7 @@ from utils import preprocess_image, download_model_from_url, load_model
 import os
 
 # Put your direct download link here (Google Drive example):
-MODEL_URL = 'https://drive.google.com/uc?id=YOUR_FILE_ID&export=download'
+MODEL_URL = 'https://drive.google.com/file/d/1WgduhxetvbQKR4sWTVA7cyftpvoN8ga-/view?usp=drive_link'
 MODEL_PATH = 'resnet18_brain_tumor.pth'
 
 @st.cache_resource
